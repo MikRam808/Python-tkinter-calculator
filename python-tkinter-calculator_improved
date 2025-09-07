@@ -1,0 +1,163 @@
+from tkinter import *
+import re  # used to validate input before evaluating
+
+
+root = Tk()
+
+
+class Calculator:
+    def click_button(self, value):
+        self.operator += str(value)
+        self.var.set(self.operator)
+
+    def clear(self):
+        self.operator = ""
+        self.var.set("")
+        self.entry.delete(0, END)
+
+    def delete(self):
+        s = self.var.get()
+        if s:
+            s = s[:-1]
+            self.operator = s
+            self.var.set(s)
+
+    def evaluate(self):
+        expr = self.var.get()
+        try:
+            # Allow only digits, + - * / . ( ) and spaces
+            if not re.fullmatch(r"[0-9+\-*/(). ]+", expr):
+                raise ValueError("Invalid input")
+            # Restricted eval: no builtins (safer than plain eval)
+            result = eval(expr, {"__builtins__": {}})
+        except Exception:
+            self.var.set("Error")
+            self.operator = ""
+        else:
+            self.var.set(str(result))
+            self.operator = str(result)
+
+    def __init__(self, master):
+        self.operator = ""
+        self.var = StringVar()
+
+        # Display field
+        frame_s = Frame(master, height=400, width=45)
+        frame_s.pack(side=TOP, fill=BOTH, expand=True)
+
+        self.entry = Entry(
+            frame_s,
+            textvariable=self.var,
+            bg="grey",
+            width=45,
+            bd=20,
+            insertwidth=4,
+            justify="right",
+            font=("arial", 10, "bold"),
+        )
+        self.entry.pack()
+
+        # Left panel (numbers and equals)
+        label_key = Label(root, height=15, width=30, bd=10, bg="gray50")
+        label_key.pack(side=LEFT, fill=BOTH, expand=True)
+
+        # Right panel (operators, C, DEL)
+        label_fkey = Label(root, height=15, width=15, bg="gray25")
+        label_fkey.pack(fill=BOTH, expand=True)
+
+        # --- Row 7 8 9 ---
+        l7 = Label(label_key, bg="black"); l7.grid(row=0, column=0)
+        Button(l7, text="7", font=("Helvetica", "16"),
+               command=lambda: self.click_button(7), bg="black", fg="cyan").pack()
+
+        l8 = Label(label_key, bg="black"); l8.grid(row=0, column=1, padx=20)
+        Button(l8, text="8", font=("Helvetica", "16"),
+               command=lambda: self.click_button(8), bg="black", fg="cyan").pack()
+
+        l9 = Label(label_key, bg="black"); l9.grid(row=0, column=2, padx=10)
+        Button(l9, text="9", font=("Helvetica", "16"),
+               command=lambda: self.click_button(9), bg="black", fg="cyan").pack()
+
+        # --- Row 4 5 6 ---
+        l4 = Label(label_key, bg="black"); l4.grid(row=1, column=0, padx=10, pady=10)
+        Button(l4, text="4", font=("Helvetica", "16"),
+               command=lambda: self.click_button(4), bg="black", fg="cyan").pack()
+
+        l5 = Label(label_key, bg="black"); l5.grid(row=1, column=1, padx=10, pady=10)
+        Button(l5, text="5", font=("Helvetica", "16"),
+               command=lambda: self.click_button(5), bg="black", fg="cyan").pack()
+
+        l6 = Label(label_key, bg="black"); l6.grid(row=1, column=2, padx=10, pady=10)
+        Button(l6, text="6", font=("Helvetica", "16"),
+               command=lambda: self.click_button(6), bg="black", fg="cyan").pack()
+
+        # --- Row 1 2 3 ---
+        l1 = Label(label_key, bg="black"); l1.grid(row=2, column=0, padx=10)
+        Button(l1, text="1", font=("Helvetica", "16"),
+               command=lambda: self.click_button(1), bg="black", fg="cyan").pack()
+
+        l2 = Label(label_key, bg="black"); l2.grid(row=2, column=1, padx=10)
+        Button(l2, text="2", font=("Helvetica", "16"),
+               command=lambda: self.click_button(2), bg="black", fg="cyan").pack()
+
+        l3 = Label(label_key, bg="black"); l3.grid(row=2, column=2, padx=10)
+        Button(l3, text="3", font=("Helvetica", "16"),
+               command=lambda: self.click_button(3), bg="black", fg="cyan").pack()
+
+        # --- Row 0 . = ---
+        l0 = Label(label_key, bg="black"); l0.grid(row=3, column=0, padx=10, pady=10)
+        Button(l0, text="0", font=("Helvetica", "16"),
+               command=lambda: self.click_button(0), bg="black", fg="cyan").pack()
+
+        ldot = Label(label_key, bg="black"); ldot.grid(row=3, column=1, padx=10, pady=10)
+        Button(ldot, text=".", font=("Helvetica", "16"),
+               command=lambda: self.click_button("."), bg="black", fg="cyan").pack()
+
+        leq = Label(label_key, bg="black"); leq.grid(row=3, column=2, padx=10, pady=10)
+        Button(leq, text="=", font=("Helvetica", "16"),
+               command=self.evaluate, bg="black", fg="cyan").pack()
+
+        # --- Function keys: C and DEL ---
+        lC = Label(label_fkey, bg="black"); lC.grid(row=0, column=0)
+        Button(lC, text="C", font=("Helvetica", "16"),
+               height=1, width=5, command=self.clear, bg="black", fg="cyan").pack(side=LEFT)
+
+        ldel = Label(label_fkey, bg="black"); ldel.grid(row=0, column=1)
+        Button(ldel, text="DEL", font=("Helvetica", "16"),
+               height=1, width=5, command=self.delete, bg="black", fg="cyan").pack()
+
+        # --- Operators ---
+        lsub = Label(label_fkey, bg="black"); lsub.grid(row=1, column=0, sticky=W, pady=10)
+        Button(lsub, text="-", font=("Helvetica", "16"),
+               height=1, width=3, command=lambda: self.click_button("-"),
+               bg="black", fg="cyan").pack(side=LEFT)
+
+        lmul = Label(label_fkey, bg="black"); lmul.grid(row=1, column=1, sticky=E)
+        Button(lmul, text="x", font=("Helvetica", "16"),
+               height=1, width=3, command=lambda: self.click_button("*"),
+               bg="black", fg="cyan").pack()
+
+        ldiv = Label(label_fkey, bg="black"); ldiv.grid(row=2, column=0, sticky=W)
+        Button(ldiv, text="/", font=("Helvetica", "16"),
+               height=1, width=3, command=lambda: self.click_button("/"),
+               bg="black", fg="cyan").pack()
+
+        ladd = Label(label_fkey, bg="black"); ladd.grid(row=2, column=1, sticky=E)
+        Button(ladd, text="+", font=("Helvetica", "16"),
+               height=1, width=3, command=lambda: self.click_button("+"),
+               bg="black", fg="cyan").pack()
+
+        llb = Label(label_fkey, bg="black"); llb.grid(row=3, column=0, sticky=W, pady=10)
+        Button(llb, text="(", font=("Helvetica", "16"),
+               height=1, width=3, command=lambda: self.click_button("("),
+               bg="black", fg="cyan").pack()
+
+        lrb = Label(label_fkey, bg="black"); lrb.grid(row=3, column=1, sticky=E, pady=10)
+        Button(lrb, text=")", font=("Helvetica", "16"),
+               height=1, width=3, command=lambda: self.click_button(")"),
+               bg="black", fg="cyan").pack()
+
+
+c = Calculator(root)
+root.title("Simple Calculator")
+root.mainloop()
